@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 import datetime
-import json
 import os
+import pymysql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,45 +13,95 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-counts = {}
+DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
+DB_USER = os.getenv('DB_USER', 'root')
+DB_PASSWORD = os.getenv('DB_PASSWORD', '1234')
+DB_NAME = os.getenv('DB_NAME', 'hammer')
+DB_CHARSET = 'utf8mb4'
 
-DATABASE = 'counts.json'
-
-def load_counts():
-    global counts
-    if os.path.exists(DATABASE):
-        try:
-            with open(DATABASE, 'r', encoding='utf-8') as f:
-                counts = json.load(f)
-        except Exception as e:
-            print(e)
-
-def save_counts():
+def get_connection():
     try:
-        with open(DATABASE, 'w', encoding='utf-8') as f:
-            json.dump(counts, f, ensure_ascii=False, indent=4)
+        connection = pymysql.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            charset=DB_CHARSET,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        return connection
     except Exception as e:
         print(e)
+        return None
+
+def create_tables():
+    connection = get_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute('''
+                CREATE TABLE IF NOT EXISTS counts (
+                    user_id VARCHAR(20) PRIMARY KEY,
+                    count INT NOT NULL DEFAULT 0
+                )
+                ''')
+            connection.commit()
+            print("테이블 생성")
+        except Exception as e:
+            print(e)
+        finally:
+            connection.close()
+
+def get_user_count(user_id):
+    connection = get_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                sql = "SELECT count FROM counts WHERE user_id = %s"
+                cursor.execute(sql, (user_id,))
+                result = cursor.fetchone()
+                if result:
+                    return result['count']
+                return 0
+        except Exception as e:
+            print(e)
+        finally:
+            connection.close()
+    return 0
+
+def update_user_count(user_id, count):
+    connection = get_connection()
+    if connection:
+        try:
+            with connection.cursor() as cursor:
+                sql = """
+                INSERT INTO counts (user_id, count) 
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE count = %s
+                """
+                cursor.execute(sql, (user_id, count, count))
+            connection.commit()
+            return True
+        except Exception as e:
+            print(e)
+        finally:
+            connection.close()
+    return False
 
 @bot.event
 async def on_ready():
-    load_counts()
+    create_tables()
     print('굿')
-    
     
 @bot.command(name='심판')
 @commands.has_permissions(moderate_members=True)  
 async def judge(ctx, member: discord.Member, *, reason: str = "없"):
-    global counts
-    
     user_id = str(member.id)
     
-    if user_id not in counts:
-        counts[user_id] = 0
+    count = get_user_count(user_id) + 1
     
-    counts[user_id] += 1
+    update_user_count(user_id, count)
     
-    count = counts[user_id]
     if count <= 3:
         timeout_duration = datetime.timedelta(minutes=1) 
         duration_text = "60초"
@@ -87,8 +137,6 @@ async def judge(ctx, member: discord.Member, *, reason: str = "없"):
         
         await ctx.send(embed=embed)
         
-        save_counts()
-        
     except discord.Forbidden:
         await ctx.send("봇 권한 이슈")
     except Exception as e:
@@ -98,7 +146,7 @@ async def judge(ctx, member: discord.Member, *, reason: str = "없"):
 @commands.has_permissions(moderate_members=True)
 async def release(ctx, member: discord.Member):
     user_id = str(member.id)
-    count = counts.get(user_id, 0)
+    count = get_user_count(user_id)
 
     try:
         await member.timeout(None)
