@@ -41,8 +41,10 @@ def create_tables():
             with connection.cursor() as cursor:
                 cursor.execute('''
                 CREATE TABLE IF NOT EXISTS counts (
-                    user_id VARCHAR(20) PRIMARY KEY,
-                    count INT NOT NULL DEFAULT 0
+                    user_id VARCHAR(20),
+                    server_id VARCHAR(20),
+                    count INT NOT NULL DEFAULT 0,
+                    PRIMARY KEY (user_id, server_id)
                 )
                 ''')
             connection.commit()
@@ -52,13 +54,13 @@ def create_tables():
         finally:
             connection.close()
 
-def get_user_count(user_id):
+def get_user_count(user_id, server_id):
     connection = get_connection()
     if connection:
         try:
             with connection.cursor() as cursor:
-                sql = "SELECT count FROM counts WHERE user_id = %s"
-                cursor.execute(sql, (user_id,))
+                sql = "SELECT count FROM counts WHERE user_id = %s AND server_id = %s"
+                cursor.execute(sql, (user_id, server_id))
                 result = cursor.fetchone()
                 if result:
                     return result['count']
@@ -69,17 +71,17 @@ def get_user_count(user_id):
             connection.close()
     return 0
 
-def update_user_count(user_id, count):
+def update_user_count(user_id, server_id, count):
     connection = get_connection()
     if connection:
         try:
             with connection.cursor() as cursor:
                 sql = """
-                INSERT INTO counts (user_id, count) 
-                VALUES (%s, %s)
+                INSERT INTO counts (user_id, server_id, count) 
+                VALUES (%s, %s, %s)
                 ON DUPLICATE KEY UPDATE count = %s
                 """
-                cursor.execute(sql, (user_id, count, count))
+                cursor.execute(sql, (user_id, server_id, count, count))
             connection.commit()
             return True
         except Exception as e:
@@ -97,10 +99,11 @@ async def on_ready():
 @commands.has_permissions(moderate_members=True)  
 async def judge(ctx, member: discord.Member, *, reason: str = "없"):
     user_id = str(member.id)
+    server_id = str(ctx.guild.id)
     
-    count = get_user_count(user_id) + 1
+    count = get_user_count(user_id, server_id) + 1
     
-    update_user_count(user_id, count)
+    update_user_count(user_id, server_id, count)
     
     if count <= 3:
         timeout_duration = datetime.timedelta(minutes=1) 
@@ -146,7 +149,8 @@ async def judge(ctx, member: discord.Member, *, reason: str = "없"):
 @commands.has_permissions(moderate_members=True)
 async def release(ctx, member: discord.Member):
     user_id = str(member.id)
-    count = get_user_count(user_id)
+    server_id = str(ctx.guild.id)
+    count = get_user_count(user_id, server_id)
 
     try:
         await member.timeout(None)
