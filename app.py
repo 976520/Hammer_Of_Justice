@@ -62,6 +62,21 @@ async def judge(ctx, member: discord.Member, *, reason: str = "없"):
     try:
         await member.timeout(timeout_duration, reason=reason)
         
+        try:
+            dm_embed = discord.Embed(
+                title="✉️ 통지서",
+                description=f"당신은 **{ctx.guild.name}** 서버에서 {duration_text}동안 타임아웃 되었습니다.",
+                color=0xFF5733
+            )
+            dm_embed.add_field(name="사유", value=reason, inline=True)
+            dm_embed.add_field(name="전과", value=f"{count}회", inline=True)
+            
+            await member.send(embed=dm_embed)
+        except discord.Forbidden:
+            await ctx.send(f"{member.mention}에게 메시지가 안보내져요")
+        except Exception as e:
+            print(e)
+        
         embed = discord.Embed(
             title="⚖️ 처벌",
             description=f"전과 {count}범 {member.mention}를 {duration_text}동안 구금했습니다.",
