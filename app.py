@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 import datetime
 import os
-import pymysql
+import mysql.connector
+from mysql.connector import Error
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,16 +22,14 @@ DB_CHARSET = 'utf8mb4'
 
 def get_connection():
     try:
-        connection = pymysql.connect(
+        connection = mysql.connector.connect(
             host=DB_HOST,
             user=DB_USER,
             password=DB_PASSWORD,
-            database=DB_NAME,
-            charset=DB_CHARSET,
-            cursorclass=pymysql.cursors.DictCursor
+            database=DB_NAME
         )
         return connection
-    except Exception as e:
+    except Error as e:
         print(e)
         return None
 
@@ -202,4 +201,5 @@ async def on_command_error(ctx, error):
         await ctx.send(embed=embed)
 
 TOKEN = os.getenv('DISCORD_TOKEN')
+print(TOKEN)
 bot.run(TOKEN)
