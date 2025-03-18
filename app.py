@@ -82,6 +82,8 @@ async def judge(ctx, member: discord.Member, *, reason: str = "없"):
 @bot.command(name='석방')
 @commands.has_permissions(moderate_members=True)
 async def release(ctx, member: discord.Member):
+    user_id = str(member.id)
+    count = counts.get(user_id, 0)
 
     try:
         await member.timeout(None)
@@ -91,8 +93,6 @@ async def release(ctx, member: discord.Member):
             description=f"전과 {count}범 {member.mention}를 석방했습니다.",
             color=0x2ECC71
         )
-        user_id = str(member.id)
-        count = counts.get(user_id, 0)
         embed.set_footer(text=f"by {ctx.author.display_name}")
         
         await ctx.send(embed=embed)
