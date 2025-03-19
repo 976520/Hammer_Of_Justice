@@ -14,7 +14,7 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
+DB_HOST = os.getenv('DB_HOST', '127.0.0.1:3306')
 DB_USER = os.getenv('DB_USER', 'root')
 DB_PASSWORD = os.getenv('DB_PASSWORD', '1234')
 DB_NAME = os.getenv('DB_NAME', 'hammer')
