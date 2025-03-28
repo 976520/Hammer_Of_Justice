@@ -14,16 +14,18 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-DB_HOST = os.getenv('DB_HOST', '127.0.0.1:3306')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = int(os.getenv('DB_PORT'))
 DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', '1234')
-DB_NAME = os.getenv('DB_NAME', 'hammer')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_NAME = os.getenv('DB_NAME')
 DB_CHARSET = 'utf8mb4'
 
 def get_connection():
     try:
         connection = mysql.connector.connect(
             host=DB_HOST,
+            port=DB_PORT,
             user=DB_USER,
             password=DB_PASSWORD,
             database=DB_NAME
@@ -52,20 +54,24 @@ def create_tables():
             print(e)
         finally:
             connection.close()
+    else:
+        print("DB연결 실패")
 
 def get_user_count(user_id, server_id):
     connection = get_connection()
     if connection:
         try:
-            with connection.cursor() as cursor:
-                sql = "SELECT count FROM counts WHERE user_id = %s AND server_id = %s"
-                cursor.execute(sql, (user_id, server_id))
-                result = cursor.fetchone()
-                if result:
-                    return result['count']
-                return 0
+            cursor = connection.cursor(dictionary=True)
+            sql = "SELECT count FROM counts WHERE user_id = %s AND server_id = %s"
+            cursor.execute(sql, (user_id, server_id))
+            result = cursor.fetchone()
+            cursor.close()
+            if result:
+                return result['count']
+            return 0
         except Exception as e:
             print(e)
+            return 0
         finally:
             connection.close()
     return 0
