@@ -2,7 +2,10 @@ import mysql.connector
 from mysql.connector import Error
 import os
 import asyncio
+import logging
 from functools import partial
+
+logger = logging.getLogger(__name__)
 
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT', '3306'))
@@ -25,9 +28,10 @@ async def get_connection():
                 database=DB_NAME
             )
         )
+        logger.info(f"get_connection OKAY: {DB_HOST}:{DB_PORT}")
         return connection
     except Error as e:
-        print(f"데이터베이스 연결 오류: {e}")
+        logger.error(f"get_connection ERROR: {e}")
         return None
 
 async def create_tables():
@@ -44,13 +48,13 @@ async def create_tables():
                 )
                 ''')
             connection.commit()
-            print("테이블 생성 완료")
+            logger.info("create_tables OKAY")
         except Exception as e:
-            print(f"테이블 생성 오류: {e}")
+            logger.error(f"create_tables ERROR: {e}")
         finally:
             connection.close()
     else:
-        print("데이터베이스 연결 실패")
+        logger.error("데이터베이스 연결 실패")
 
 async def get_user_count(user_id, server_id):
     connection = await get_connection()
@@ -65,7 +69,7 @@ async def get_user_count(user_id, server_id):
                 return result['count']
             return 0
         except Exception as e:
-            print(f"사용자 카운트 조회 오류: {e}")
+            logger.error(f"get_user_count ERROR: {e}")
             return 0
         finally:
             connection.close()
@@ -83,9 +87,10 @@ async def update_user_count(user_id, server_id, count):
                 """
                 cursor.execute(sql, (user_id, server_id, count, count))
             connection.commit()
+            logger.info(f"update_user_count OKAY: {user_id} - {count}")
             return True
         except Exception as e:
-            print(f"사용자 카운트 업데이트 오류: {e}")
+            logger.error(f"update_user_count ERROR: {e}")
         finally:
             connection.close()
     return False 
