@@ -64,7 +64,7 @@ def get_user_count(user_id, server_id):
             connection.close()
     return 0
 
-def update_user_count(user_id, server_id, count):
+def set_user_count(user_id, server_id, count):
     connection = get_connection()
     if connection:
         try:
@@ -76,6 +76,7 @@ def update_user_count(user_id, server_id, count):
                 """
                 cursor.execute(sql, (user_id, server_id, count, count))
             connection.commit()
+            print('set: ', user_id, server_id, count)
             return True
         except Exception as e:
             print(e)

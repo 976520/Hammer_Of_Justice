@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import datetime
-from database import get_user_count, update_user_count
+from database import get_user_count, set_user_count
 from utils.embeds import create_warning_embed, create_error_embed
 
 class Judge(commands.Cog):
@@ -15,8 +15,8 @@ class Judge(commands.Cog):
         server_id = str(ctx.guild.id)
         
         count = get_user_count(user_id, server_id) + 1
-        
-        update_user_count(user_id, server_id, count)
+        print('get: ', user_id, server_id, count)
+        set_user_count(user_id, server_id, count)
         
         if count <= 3:
             timeout_duration = datetime.timedelta(minutes=1) 
