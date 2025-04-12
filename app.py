@@ -8,13 +8,11 @@ from commands import Judge, Release, Clean
 from utils.embeds import create_error_embed
 
 # 로깅 설정
+log_file = os.path.join(os.getcwd(), 'bot.log')
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('bot.log', encoding='utf-8')
-    ]
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
