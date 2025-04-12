@@ -1,10 +1,17 @@
 import discord
 from discord.ext import commands
 import os
+import logging
 from dotenv import load_dotenv
 from database import create_tables
 from commands import Judge, Release, Clean
 from utils.embeds import create_error_embed
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -19,7 +26,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 @bot.event
 async def on_ready():
     await create_tables()
-    print('굿')
+    logger.info('OKAY')
 
 @bot.event
 async def on_command_error(ctx, error):
