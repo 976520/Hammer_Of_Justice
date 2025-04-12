@@ -19,7 +19,7 @@ class Help(commands.Cog):
         )
             
         embed.add_field(name="/심판 <유저> <?사유>", value="유저에게 타임아웃을 적용합니다 (전과 <= 3 이면 60초, 아니면 1주일)", inline=True)
-        embed.add_field(name="/석방 <유저>", value="유저에게 적용된 타임아웃을 해제합니다", inline=True)
+        embed.add_field(name="/석방 <유저> <?전과삭제>", value="유저에게 적용된 타임아웃을 해제합니다 (전과삭제 = True 이면 전과 1 감소)", inline=True)
         embed.add_field(name="/청소 <?채널>", value="채널을 삭제 후 재생성합니다 (채널 이름 입력 시 해당 채널만 청소)", inline=True)
         
 
