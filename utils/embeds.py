@@ -33,10 +33,3 @@ def create_success_embed(title: str, description: str, footer: str = None) -> di
         footer=footer
     )
 
-def create_warning_embed(title: str, description: str, footer: str = None) -> discord.Embed:
-    return create_embed(
-        title=title,
-        description=description,
-        color=0xFF5733,
-        footer=footer
-    ) 
