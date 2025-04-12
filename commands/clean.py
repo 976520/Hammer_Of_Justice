@@ -1,6 +1,9 @@
 import discord
 from discord.ext import commands
+import logging
 from utils.embeds import create_notice_embed, create_success_embed, create_error_embed
+
+logger = logging.getLogger(__name__)
 
 class Clean(commands.Cog):
     def __init__(self, bot):
@@ -9,6 +12,7 @@ class Clean(commands.Cog):
     @commands.command(name='청소')
     @commands.has_permissions(manage_channels=True)
     async def clean_channel(self, ctx, *, channel_name: str = None):
+        logger.info(f"청소 명령어 실행 - 서버: {ctx.guild.name}, 실행자: {ctx.author.name}")
         try:
             original_channel = ctx.channel
             channel_to_delete = original_channel
@@ -52,8 +56,10 @@ class Clean(commands.Cog):
             ))
             
         except discord.Forbidden:
+            logger.error(f"채널 삭제 실패 (권한 없음) - 채널: {ctx.channel.name}")
             await ctx.send(embed=create_error_embed("채널을 관리할 권한이 없습니다."))
         except Exception as e:
+            logger.error(f"채널 삭제 중 오류 발생 - 채널: {ctx.channel.name}, 오류: {str(e)}")
             await ctx.send(embed=create_error_embed(str(e)))
 
 async def setup(bot):
