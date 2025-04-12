@@ -18,7 +18,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 @bot.event
 async def on_ready():
-    create_tables()
+    await create_tables()
     print('굿')
 
 @bot.event

@@ -12,7 +12,7 @@ class Release(commands.Cog):
     async def release(self, ctx, member: discord.Member):
         user_id = str(member.id)
         server_id = str(ctx.guild.id)
-        count = get_user_count(user_id, server_id)
+        count = await get_user_count(user_id, server_id)
 
         try:
             await member.timeout(None)

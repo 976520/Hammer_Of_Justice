@@ -1,6 +1,8 @@
 import mysql.connector
 from mysql.connector import Error
 import os
+import asyncio
+from functools import partial
 
 DB_HOST = os.getenv('DB_HOST')
 DB_PORT = int(os.getenv('DB_PORT', '3306'))
@@ -9,22 +11,27 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 DB_NAME = os.getenv('DB_NAME')
 DB_CHARSET = 'utf8mb4'
 
-def get_connection():
+async def get_connection():
     try:
-        connection = mysql.connector.connect(
-            host=DB_HOST,
-            port=DB_PORT,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
+        loop = asyncio.get_event_loop()
+        connection = await loop.run_in_executor(
+            None,
+            partial(
+                mysql.connector.connect,
+                host=DB_HOST,
+                port=DB_PORT,
+                user=DB_USER,
+                password=DB_PASSWORD,
+                database=DB_NAME
+            )
         )
         return connection
     except Error as e:
-        print(e)
+        print(f"데이터베이스 연결 오류: {e}")
         return None
 
-def create_tables():
-    connection = get_connection()
+async def create_tables():
+    connection = await get_connection()
     if connection:
         try:
             with connection.cursor() as cursor:
@@ -37,16 +44,16 @@ def create_tables():
                 )
                 ''')
             connection.commit()
-            print("테이블 생성")
+            print("테이블 생성 완료")
         except Exception as e:
-            print(e)
+            print(f"테이블 생성 오류: {e}")
         finally:
             connection.close()
     else:
-        print("DB연결 실패")
+        print("데이터베이스 연결 실패")
 
-def get_user_count(user_id, server_id):
-    connection = get_connection()
+async def get_user_count(user_id, server_id):
+    connection = await get_connection()
     if connection:
         try:
             cursor = connection.cursor(dictionary=True)
@@ -58,14 +65,14 @@ def get_user_count(user_id, server_id):
                 return result['count']
             return 0
         except Exception as e:
-            print(e)
+            print(f"사용자 카운트 조회 오류: {e}")
             return 0
         finally:
             connection.close()
     return 0
 
-def set_user_count(user_id, server_id, count):
-    connection = get_connection()
+async def update_user_count(user_id, server_id, count):
+    connection = await get_connection()
     if connection:
         try:
             with connection.cursor() as cursor:
@@ -76,10 +83,9 @@ def set_user_count(user_id, server_id, count):
                 """
                 cursor.execute(sql, (user_id, server_id, count, count))
             connection.commit()
-            print('set: ', user_id, server_id, count)
             return True
         except Exception as e:
-            print(e)
+            print(f"사용자 카운트 업데이트 오류: {e}")
         finally:
             connection.close()
     return False 
