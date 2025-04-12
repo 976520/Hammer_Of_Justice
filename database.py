@@ -16,7 +16,6 @@ DB_CHARSET = 'utf8mb4'
 
 async def get_connection():
     try:
-        logger.info(f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
         loop = asyncio.get_event_loop()
         connection = await loop.run_in_executor(
             None,
@@ -29,10 +28,10 @@ async def get_connection():
                 database=DB_NAME
             )
         )
-        logger.info(f"get_connection OKAY: {DB_HOST}:{DB_PORT}")
+        logger.info(f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} connection OKAY")
         return connection
     except Error as e:
-        logger.error(f"get_connection ERROR: {e}")
+        logger.error(f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} connection FAIL: {e}")
         return None
 
 async def create_tables():
@@ -49,13 +48,13 @@ async def create_tables():
                 )
                 ''')
             connection.commit()
-            logger.info("create_tables OKAY")
+            logger.info("create_tables OKAY ")
         except Exception as e:
-            logger.error(f"create_tables ERROR: {e}")
+            logger.error(f"create_tables FAIL: {e}")
         finally:
             connection.close()
     else:
-        logger.error("데이터베이스 연결 실패")
+        logger.error("DB 연결이 안됐는데 CREATE TABLE이 되겠노")
 
 async def get_user_count(user_id, server_id):
     connection = await get_connection()
@@ -70,13 +69,13 @@ async def get_user_count(user_id, server_id):
                 return result['count']
             return 0
         except Exception as e:
-            logger.error(f"get_user_count ERROR: {e}")
+            logger.error(f"get_user_count({user_id}, {server_id}) FAIL: {e}")
             return 0
         finally:
             connection.close()
     return 0
 
-async def update_user_count(user_id, server_id, count):
+async def set_user_count(user_id, server_id, count):
     connection = await get_connection()
     if connection:
         try:
@@ -88,10 +87,10 @@ async def update_user_count(user_id, server_id, count):
                 """
                 cursor.execute(sql, (user_id, server_id, count, count))
             connection.commit()
-            logger.info(f"update_user_count OKAY: {user_id} - {count}")
+            logger.info(f"set_user_count({user_id}, {server_id}, {count}) OKAY")
             return True
         except Exception as e:
-            logger.error(f"update_user_count ERROR: {e}")
+            logger.error(f"set_user_count({user_id}, {server_id}, {count}) FAIL: {e}")
         finally:
             connection.close()
     return False 

@@ -12,7 +12,7 @@ class Clean(commands.Cog):
     @commands.command(name='청소')
     @commands.has_permissions(manage_channels=True)
     async def clean_channel(self, ctx, *, channel_name: str = None):
-        logger.info(f"청소 명령어 실행 - 서버: {ctx.guild.name}, 실행자: {ctx.author.name}")
+        logger.info(f"clean_channel({ctx.guild.name}, {ctx.author.name})")
         try:
             original_channel = ctx.channel
             channel_to_delete = original_channel
@@ -22,7 +22,7 @@ class Clean(commands.Cog):
                 if found_channel:
                     channel_to_delete = found_channel
                 else:
-                    await ctx.send(embed=create_error_embed(f"'{channel_name}' 채널을 찾을 수 없습니다."))
+                    await ctx.send(embed=create_error_embed(f"'{channel_name}' 이런 채널 없는데요"))
                     return
             
             category = channel_to_delete.category
@@ -56,10 +56,8 @@ class Clean(commands.Cog):
             ))
             
         except discord.Forbidden:
-            logger.error(f"채널 삭제 실패 (권한 없음) - 채널: {ctx.channel.name}")
-            await ctx.send(embed=create_error_embed("채널을 관리할 권한이 없습니다."))
+            await ctx.send(embed=create_error_embed("권한 없음 이슈"))
         except Exception as e:
-            logger.error(f"채널 삭제 중 오류 발생 - 채널: {ctx.channel.name}, 오류: {str(e)}")
             await ctx.send(embed=create_error_embed(str(e)))
 
 async def setup(bot):

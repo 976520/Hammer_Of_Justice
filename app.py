@@ -26,22 +26,14 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 
 @bot.event
 async def on_ready():
-    logger.info(f'봇이 로그인했습니다: {bot.user.name} (ID: {bot.user.id})')
-    logger.info('데이터베이스 테이블 생성 중...')
+    logger.info(f'심판의 망치 등장: {bot.user.name} (ID: {bot.user.id})')
     await create_tables()
-    logger.info('데이터베이스 테이블 생성 완료')
     
-    # 명령어 로딩
-    logger.info('명령어 로딩 중...')
     await bot.add_cog(Judge(bot))
-    logger.info('심판 명령어 로딩 완료')
     await bot.add_cog(Release(bot))
-    logger.info('석방 명령어 로딩 완료')
     await bot.add_cog(Clean(bot))
-    logger.info('청소 명령어 로딩 완료')
     
-    # 로드된 명령어 목록 출력
-    logger.info('로드된 명령어 목록:')
+    logger.info('bot.commands:')
     for command in bot.commands:
         logger.info(f'- {command.name}')
 
@@ -58,6 +50,6 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send(embed=create_error_embed("권한 없음"))
     else:
-        logger.error(f'처리되지 않은 오류: {str(error)}')
+        logger.error({str(error)})
 
 bot.run(os.getenv('DISCORD_TOKEN')) 
