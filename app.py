@@ -21,7 +21,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-TOKEN = os.getenv('DISCORD_TOKEN')
 
 @bot.event
 async def on_ready():
@@ -45,4 +44,4 @@ async def setup():
     await bot.add_cog(Release(bot))
     await bot.add_cog(Clean(bot))
 
-bot.run(TOKEN) 
+bot.run(os.getenv('DISCORD_TOKEN')) 
