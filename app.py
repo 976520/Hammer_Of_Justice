@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from database import create_tables
 from commands import Judge, Release, Clean
+from utils.embeds import create_error_embed
 
 load_dotenv()
 
@@ -24,33 +25,13 @@ async def on_ready():
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         if error.param.name == 'member':
-            embed = discord.Embed(
-                title="❌ 오류",
-                description="멤버 파라미터 없음",
-                color=0xE74C3C
-            )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=create_error_embed("멤버 파라미터 없음"))
         elif error.param.name == 'reason':
-            embed = discord.Embed(
-                title="❌ 오류",
-                description="사유 파라미터 없음",
-                color=0xE74C3C
-            )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=create_error_embed("사유 파라미터 없음"))
     elif isinstance(error, commands.MemberNotFound):
-        embed = discord.Embed(
-            title="❌ 오류",
-            description="멤버 낫파운드",
-            color=0xE74C3C
-        )
-        await ctx.send(embed=embed)
+        await ctx.send(embed=create_error_embed("멤버 낫파운드"))
     elif isinstance(error, commands.MissingPermissions):
-        embed = discord.Embed(
-            title="❌ 오류",
-            description="권한 없음",
-            color=0xE74C3C
-        )
-        await ctx.send(embed=embed)
+        await ctx.send(embed=create_error_embed("권한 없음"))
 
 async def setup():
     await bot.add_cog(Judge(bot))

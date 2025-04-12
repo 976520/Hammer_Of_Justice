@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from utils.embeds import create_notice_embed, create_success_embed, create_error_embed
 
 class Clean(commands.Cog):
     def __init__(self, bot):
@@ -17,12 +18,7 @@ class Clean(commands.Cog):
                 if found_channel:
                     channel_to_delete = found_channel
                 else:
-                    embed = discord.Embed(
-                        title="❌ 오류",
-                        description=f"'{channel_name}' 채널을 찾을 수 없습니다.",
-                        color=0xE74C3C
-                    )
-                    await ctx.send(embed=embed)
+                    await ctx.send(embed=create_error_embed(f"'{channel_name}' 채널을 찾을 수 없습니다."))
                     return
             
             category = channel_to_delete.category
@@ -32,12 +28,10 @@ class Clean(commands.Cog):
             nsfw = channel_to_delete.is_nsfw()
             overwrites = channel_to_delete.overwrites
             
-            embed = discord.Embed(
+            await ctx.send(embed=create_notice_embed(
                 title="🧹 채널 청소",
-                description=f"채널 '{channel_to_delete.name}'을(를) 삭제하고 다시 생성합니다.",
-                color=0x3498DB
-            )
-            await ctx.send(embed=embed)
+                description=f"채널 '{channel_to_delete.name}'을(를) 삭제하고 다시 생성합니다."
+            ))
             
             await channel_to_delete.delete(reason="더럽다 더러워")
             
@@ -52,27 +46,15 @@ class Clean(commands.Cog):
                 reason="더럽다 더러워"
             )
             
-            embed = discord.Embed(
+            await new_channel.send(embed=create_success_embed(
                 title="✅ 청소 완료",
-                description=f"채널이 성공적으로 청소되었습니다.",
-                color=0x2ECC71
-            )
-            await new_channel.send(embed=embed)
+                description="채널이 성공적으로 청소되었습니다."
+            ))
             
         except discord.Forbidden:
-            embed = discord.Embed(
-                title="❌ 오류",
-                description="채널을 관리할 권한이 없습니다.",
-                color=0xE74C3C
-            )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=create_error_embed("채널을 관리할 권한이 없습니다."))
         except Exception as e:
-            embed = discord.Embed(
-                title="❌ 오류",
-                description=e,
-                color=0xE74C3C
-            )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=create_error_embed(str(e)))
 
 async def setup(bot):
     await bot.add_cog(Clean(bot)) 
