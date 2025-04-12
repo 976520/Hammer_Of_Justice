@@ -16,6 +16,7 @@ DB_CHARSET = 'utf8mb4'
 
 async def get_connection():
     try:
+        logger.info(f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
         loop = asyncio.get_event_loop()
         connection = await loop.run_in_executor(
             None,
