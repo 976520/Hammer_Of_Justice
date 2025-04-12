@@ -4,7 +4,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from database import create_tables
-from commands import Judge, Release, Clean
+from commands import Judge, Release, Clean, Help
 from utils.embeds import create_error_embed
 
 # 로깅 설정
@@ -32,6 +32,7 @@ async def on_ready():
     await bot.add_cog(Judge(bot))
     await bot.add_cog(Release(bot))
     await bot.add_cog(Clean(bot))
+    await bot.add_cog(Help(bot))
     
     logger.info('bot.commands:')
     for command in bot.commands:
@@ -39,7 +40,6 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-    logger.error(f'명령어 오류 발생: {str(error)}')
     if isinstance(error, commands.MissingRequiredArgument):
         if error.param.name == 'member':
             await ctx.send(embed=create_error_embed("멤버 파라미터 없음"))
@@ -50,6 +50,6 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send(embed=create_error_embed("권한 없음"))
     else:
-        logger.error({str(error)})
+        logger.error(str(error))
 
 bot.run(os.getenv('DISCORD_TOKEN')) 
