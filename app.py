@@ -7,7 +7,6 @@ from database import create_tables
 from commands import Judge, Release, Clean, Help
 from utils.embeds import create_error_embed
 
-# 로깅 설정
 log_file = os.path.join(os.getcwd(), 'bot.log')
 logging.basicConfig(
     level=logging.INFO,
