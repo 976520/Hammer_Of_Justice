@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class Judge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    @commands.command(name='심판', aliases=['judge', 'j', 'J', 'JUDGE'])
+    @commands.command(name='심판', aliases=['judge', 'j', 'J', 'JUDGE', '타임아웃', 'ㅓ'])
     @commands.has_permissions(moderate_members=True)  
     async def judge(self, ctx, member: discord.Member, *, reason: str = "없"):
         logger.info(f"judge({ctx.guild.name}, {ctx.author.name}, {member.name}, {reason})")
